@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Time-Series Forecasting</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <style>
+        body {
+            background: #f4f7f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+        }
+        
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        
+        .forecast-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-top: 30px;
+        }
+        
+        .forecast-value {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .forecast-value h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .method-badge {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .lstm-badge {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .prophet-badge {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            border: none;
+        }
+        
+        .footer {
+            background: #1b5e20;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-seedling"></i> AgriDSS</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/predict">Predict</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/forecasting">Forecasting</a></li>
+                <li class="nav-item"><a class="nav-link" href="/geospatial">Geospatial</a></li>
+                <li class="nav-item"><a class="nav-link" href="/model-comparison">Models</a></li>
+                <li class="nav-item"><a class="nav-link" href="/explainable-ai">Explainable AI</a></li>
+                <li class="nav-item"><a class="nav-link" href="/reports">Reports</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="forecast-card">
+        <h3 class="mb-4"><i class="fas fa-chart-line"></i> Time-Series Yield Forecasting</h3>
+        
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        
+        <!-- Filter Form -->
+        <form method="GET" action="/forecasting" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Crop</label>
+                    <select name="crop" class="form-control">
+                        {% for c in crops %}
+                        <option value="{{ c }}" {% if c == crop %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>State</label>
+                    <select name="state" class="form-control">
+                        {% for s in states %}
+                        <option value="{{ s }}" {% if s == state %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Forecast Years</label>
+                    <select name="years" class="form-control">
+                        <option value="3" {% if years == 3 %}selected{% endif %}>3 Years</option>
+                        <option value="5" {% if years == 5 %}selected{% endif %}>5 Years</option>
+                        <option value="10" {% if years == 10 %}selected{% endif %}>10 Years</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">
+                <i class="fas fa-sync-alt"></i> Generate Forecast
+            </button>
+        </form>
+        
+        {% if forecast_graph %}
+        <!-- Forecast Graph -->
+        <div id="forecastGraph"></div>
+        
+        <!-- Forecast Values -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="method-badge lstm-badge">
+                    <h5>LSTM Forecast</h5>
+                    <h3>{{ lstm_forecast|round(2) }} tons/ha</h3>
+                    <small>Predicted for {{ crop }} in {{ state }} (Year {{ years }} ahead)</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="method-badge prophet-badge">
+                    <h5>Prophet Forecast</h5>
+                    <h3>{{ prophet_forecast|round(2) }} tons/ha</h3>
+                    <small>Predicted for {{ crop }} in {{ state }} (Year {{ years }} ahead)</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interpretation -->
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle"></i>
+            <strong>Analysis:</strong> The forecast suggests 
+            {% if lstm_forecast > prophet_forecast %}
+            LSTM predicts higher yields while Prophet is more conservative.
+            {% else %}
+            Prophet predicts higher yields while LSTM is more conservative.
+            {% endif %}
+            Consider using ensemble approach for more robust predictions.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="footer">
+    M.Tech Research | Time-Series Forecasting with Deep Learning
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+{% if forecast_graph %}
+<script>
+    var forecastGraph = {{ forecast_graph | safe }};
+    Plotly.newPlot('forecastGraph', forecastGraph.data, forecastGraph.layout);
+</script>
+{% endif %}
+
+</body>
+</html>

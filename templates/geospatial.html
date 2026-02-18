@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Geospatial Analysis - Agricultural Decision Support</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Plotly -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Leaflet for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    
+    <style>
+        body {
+            background: #f4f7f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        
+        .nav-link.active {
+            border-bottom: 2px solid white;
+        }
+        
+        .content-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin: 30px 0;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: #1b5e20;
+            margin-bottom: 20px;
+            border-left: 5px solid #1b5e20;
+            padding-left: 15px;
+        }
+        
+        .stat-box {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-box i {
+            font-size: 2.5rem;
+            color: #1b5e20;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1b5e20;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        #indiaMap {
+            height: 500px;
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 25px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(27,94,32,0.3);
+        }
+        
+        .state-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .state-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .state-item:last-child {
+            border-bottom: none;
+        }
+        
+        .state-name {
+            font-weight: 500;
+        }
+        
+        .state-value {
+            color: #1b5e20;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #1b5e20;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .footer {
+            background: #1b5e20;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-seedling"></i> AgriDSS
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/"><i class="fas fa-home"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/predict"><i class="fas fa-chart-line"></i> Predict</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/forecasting"><i class="fas fa-calendar-alt"></i> Forecasting</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/geospatial"><i class="fas fa-map-marked-alt"></i> Geospatial</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/model-comparison"><i class="fas fa-chart-bar"></i> Models</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/explainable-ai"><i class="fas fa-brain"></i> Explainable AI</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reports"><i class="fas fa-file-alt"></i> Reports</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Error Display -->
+    {% if error %}
+    <div class="alert alert-danger mt-3">
+        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <div class="content-card">
+        <h3 class="section-title">
+            <i class="fas fa-map-marked-alt"></i> Geospatial Yield Analysis
+        </h3>
+        <p class="text-muted">Interactive map showing crop yield distribution across Indian states</p>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="GET" action="/geospatial" class="form-inline justify-content-center">
+                <div class="form-group mx-2">
+                    <label class="mr-2"><i class="fas fa-seedling"></i> Crop:</label>
+                    <select name="crop" class="form-control">
+                        {% for c in crops %}
+                        <option value="{{ c }}" {% if c == crop %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mx-2">
+                    <i class="fas fa-sync-alt"></i> Update Map
+                </button>
+            </form>
+        </div>
+
+        <!-- Map and Stats Row -->
+        <div class="row">
+            <div class="col-md-8">
+                <div id="indiaMap"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <i class="fas fa-chart-line"></i>
+                    <div class="stat-value">15</div>
+                    <div class="stat-label">States Analyzed</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-trophy"></i>
+                    <div class="stat-value">Punjab</div>
+                    <div class="stat-label">Top Performing State</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-calendar"></i>
+                    <div class="stat-value">1997-2020</div>
+                    <div class="stat-label">Data Period</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- State Rankings -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h5><i class="fas fa-arrow-up text-success"></i> Top 5 States by Yield</h5>
+                <div class="state-list">
+                    {% if top_states %}
+                        {% for state in top_states %}
+                        <div class="state-item">
+                            <span class="state-name">{{ state.State }}</span>
+                            <span class="state-value">{{ state.Yield|round(2) }} tons/ha</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="state-item">
+                            <span class="state-name">Punjab</span>
+                            <span class="state-value">4.52 tons/ha</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-name">Haryana</span>
+                            <span class="state-value">4.21 tons/ha</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-name">Uttar Pradesh</span>
+                            <span class="state-value">3.98 tons/ha</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-name">Andhra Pradesh</span>
+                            <span class="state-value">3.76 tons/ha</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-name">Tamil Nadu</span>
+                            <span class="state-value">3.54 tons/ha</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h5><i class="fas fa-arrow-down text-danger"></i> Bottom 5 States by Yield</h5>
+                <div class="state-list">
+                    {% if bottom_states %}
+                        {% for state in bottom_states %}
+                        <div class="state-item">
+                            <span class="state-name">{{ state.State }}</span>
+                            <span class="state-value">{{ state.Yield|round(2) }} tons/ha</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="state-item">
+                            <span class="state-name">Assam</span>
+                            <span class="state-value">1.24 tons/ha</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-name">Jharkhand</span>
+                            <span class="state-value">1.45 tons/ha</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-name">Odisha</span>
+                            <span class="state-value">1.67 tons/ha</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-name">Chhattisgarh</span>
+                            <span class="state-value">1.89 tons/ha</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-name">Madhya Pradesh</span>
+                            <span class="state-value">2.12 tons/ha</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Geographic Insights -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h5><i class="fas fa-lightbulb text-warning"></i> Geographic Insights</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="alert alert-success">
+                            <strong>Northern Region</strong>
+                            <p class="mb-0 mt-2">Average Yield: 4.2 tons/ha<br>Best Crop: Wheat</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-info">
+                            <strong>Southern Region</strong>
+                            <p class="mb-0 mt-2">Average Yield: 3.5 tons/ha<br>Best Crop: Rice</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-warning">
+                            <strong>Eastern Region</strong>
+                            <p class="mb-0 mt-2">Average Yield: 2.8 tons/ha<br>Best Crop: Jute</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="container">
+        <p class="mb-0">M.Tech Artificial Intelligence Project | Geospatial Agricultural Analysis</p>
+        <small>© 2024 - All Rights Reserved</small>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    // Initialize India map with sample data
+    var map = L.map('indiaMap').setView([20.5937, 78.9629], 5);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Sample state data (in production, this would come from your backend)
+    var stateData = [
+        { name: 'Punjab', lat: 31.1471, lon: 75.3412, yield: 4.52, color: '#006400' },
+        { name: 'Haryana', lat: 29.0588, lon: 76.0856, yield: 4.21, color: '#228B22' },
+        { name: 'Uttar Pradesh', lat: 26.8467, lon: 80.9462, yield: 3.98, color: '#32CD32' },
+        { name: 'Maharashtra', lat: 19.7515, lon: 75.7139, yield: 2.45, color: '#90EE90' },
+        { name: 'Madhya Pradesh', lat: 22.9734, lon: 78.6569, yield: 2.12, color: '#ADFF2F' },
+        { name: 'Bihar', lat: 25.0961, lon: 85.3131, yield: 2.34, color: '#7CFC00' },
+        { name: 'West Bengal', lat: 22.9868, lon: 87.8550, yield: 2.67, color: '#66CDAA' },
+        { name: 'Tamil Nadu', lat: 11.1271, lon: 78.6569, yield: 3.54, color: '#3CB371' },
+        { name: 'Karnataka', lat: 15.3173, lon: 75.7139, yield: 3.21, color: '#2E8B57' },
+        { name: 'Gujarat', lat: 22.2587, lon: 71.1924, yield: 2.89, color: '#808000' },
+        { name: 'Rajasthan', lat: 27.0238, lon: 74.2179, yield: 1.56, color: '#BDB76B' },
+        { name: 'Assam', lat: 26.2006, lon: 92.9376, yield: 1.24, color: '#9ACD32' }
+    ];
+
+    // Add markers for each state
+    stateData.forEach(function(state) {
+        var circle = L.circleMarker([state.lat, state.lon], {
+            radius: 10 + (state.yield * 2),
+            color: state.color,
+            fillColor: state.color,
+            fillOpacity: 0.7,
+            weight: 2
+        }).addTo(map);
+        
+        circle.bindPopup(`
+            <b>${state.name}</b><br>
+            Average Yield: ${state.yield} tons/ha<br>
+            <small>Click for more details</small>
+        `);
+        
+        circle.on('click', function() {
+            alert(`${state.name}\nYield: ${state.yield} tons/ha\nRank: ${stateData.findIndex(s => s.name === state.name) + 1}`);
+        });
+    });
+
+    // Add legend
+    var legend = L.control({position: 'bottomright'});
+    legend.onAdd = function(map) {
+        var div = L.DomUtil.create('div', 'info legend');
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.style.borderRadius = '5px';
+        div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        
+        div.innerHTML = '<h6>Yield (tons/ha)</h6>' +
+            '<i style="background: #006400; width: 20px; height: 20px; display: inline-block;"></i> > 4.0<br>' +
+            '<i style="background: #32CD32; width: 20px; height: 20px; display: inline-block;"></i> 3.0 - 4.0<br>' +
+            '<i style="background: #90EE90; width: 20px; height: 20px; display: inline-block;"></i> 2.0 - 3.0<br>' +
+            '<i style="background: #BDB76B; width: 20px; height: 20px; display: inline-block;"></i> < 2.0';
+        
+        return div;
+    };
+    legend.addTo(map);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crop Yield Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        body {
+            background: #f4f7f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        
+        .nav-link.active {
+            border-bottom: 2px solid white;
+        }
+        
+        .prediction-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin: 30px 0;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: #1b5e20;
+            margin-bottom: 20px;
+            border-left: 5px solid #1b5e20;
+            padding-left: 15px;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .form-control, .custom-select {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            height: auto;
+        }
+        
+        .form-control:focus, .custom-select:focus {
+            border-color: #1b5e20;
+            box-shadow: 0 0 0 0.2rem rgba(27,94,32,0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 40px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(27,94,32,0.3);
+        }
+        
+        .info-box {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box i {
+            color: #1b5e20;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            background: #1b5e20;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .error-alert {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-seedling"></i> AgriDSS
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/"><i class="fas fa-home"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/predict"><i class="fas fa-chart-line"></i> Predict</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/forecasting"><i class="fas fa-calendar-alt"></i> Forecasting</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/geospatial"><i class="fas fa-map-marked-alt"></i> Geospatial</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/model-comparison"><i class="fas fa-chart-bar"></i> Models</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/explainable-ai"><i class="fas fa-brain"></i> Explainable AI</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reports"><i class="fas fa-file-alt"></i> Reports</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="prediction-card">
+        <h3 class="section-title">
+            <i class="fas fa-magic"></i> Crop Yield Prediction Module
+        </h3>
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="info-box text-center">
+                    <i class="fas fa-robot"></i>
+                    <h5>Multi-Model AI</h5>
+                    <small>Random Forest, XGBoost, LSTM</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box text-center">
+                    <i class="fas fa-chart-pie"></i>
+                    <h5>Explainable Predictions</h5>
+                    <small>Feature importance analysis</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box text-center">
+                    <i class="fas fa-check-circle"></i>
+                    <h5>High Accuracy</h5>
+                    <small>R² > 0.90 on test data</small>
+                </div>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error-alert">
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/predict" method="POST">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label><i class="fas fa-seedling text-success"></i> Crop *</label>
+                        <select name="crop" class="custom-select" required>
+                            <option value="">-- Select Crop --</option>
+                            {% for crop in crops %}
+                            <option value="{{ crop }}">{{ crop }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt text-success"></i> State *</label>
+                        <select name="state" class="custom-select" required>
+                            <option value="">-- Select State --</option>
+                            {% for state in states %}
+                            <option value="{{ state }}">{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar text-success"></i> Season *</label>
+                        <select name="season" class="custom-select" required>
+                            <option value="">-- Select Season --</option>
+                            {% for season in seasons %}
+                            <option value="{{ season }}">{{ season }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> Year</label>
+                        <input type="number" name="year" class="form-control" placeholder="e.g., 2023" 
+                               value="{{ request.form.year or '' }}">
+                        <small class="text-muted">Leave empty for default</small>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label><i class="fas fa-cloud-rain"></i> Rainfall (mm)</label>
+                        <input type="number" step="0.1" name="rainfall" class="form-control" 
+                               placeholder="e.g., 1200.5" value="{{ request.form.rainfall or '' }}">
+                        <small class="text-muted">Annual rainfall</small>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label><i class="fas fa-flask"></i> Fertilizer (kg/ha)</label>
+                        <input type="number" step="0.1" name="fertilizer" class="form-control" 
+                               placeholder="e.g., 150.5" value="{{ request.form.fertilizer or '' }}">
+                        <small class="text-muted">per hectare</small>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label><i class="fas fa-bug"></i> Pesticide (kg/ha)</label>
+                        <input type="number" step="0.1" name="pesticide" class="form-control" 
+                               placeholder="e.g., 2.5" value="{{ request.form.pesticide or '' }}">
+                        <small class="text-muted">per hectare</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="fas fa-thermometer-half"></i> Temperature (°C) - Optional</label>
+                        <input type="number" step="0.1" name="temperature" class="form-control" 
+                               placeholder="e.g., 25.5" value="{{ request.form.temperature or '' }}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="fas fa-tint"></i> Humidity (%) - Optional</label>
+                        <input type="number" step="0.1" name="humidity" class="form-control" 
+                               placeholder="e.g., 65" value="{{ request.form.humidity or '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="fas fa-cogs"></i> Select Model</label>
+                        <select name="model_type" class="custom-select">
+                            <option value="Random Forest">Random Forest (Recommended)</option>
+                            <option value="XGBoost">XGBoost</option>
+                            <option value="Gradient Boosting">Gradient Boosting</option>
+                            <option value="LSTM">LSTM (Deep Learning)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-calculator"></i> Generate AI Prediction
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="mt-4 p-3 bg-light rounded">
+            <small class="text-muted">
+                <i class="fas fa-info-circle"></i> 
+                Fields marked with * are required. Optional fields will use median values from historical data if left empty.
+                The model will provide yield prediction in metric tons per hectare.
+            </small>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="container">
+        <p class="mb-0">M.Tech Artificial Intelligence Project | Explainable AI for Agricultural Decision Support</p>
+        <small>© 2024 - All Rights Reserved</small>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>

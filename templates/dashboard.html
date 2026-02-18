@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agricultural Decision Support System - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Plotly -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <style>
+        body {
+            background: #f4f7f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            color: white !important;
+            border-bottom: 2px solid white;
+        }
+        
+        .dashboard-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            transition: transform 0.3s;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .stat-card .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .quick-predict {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(27,94,32,0.3);
+        }
+        
+        .footer {
+            background: #1b5e20;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            color: #1b5e20;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-seedling"></i> AgriDSS
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/"><i class="fas fa-home"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/predict"><i class="fas fa-chart-line"></i> Predict</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/forecasting"><i class="fas fa-calendar-alt"></i> Forecasting</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/geospatial"><i class="fas fa-map-marked-alt"></i> Geospatial</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/model-comparison"><i class="fas fa-chart-bar"></i> Models</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/explainable-ai"><i class="fas fa-brain"></i> Explainable AI</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reports"><i class="fas fa-file-alt"></i> Reports</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h2>Welcome to Agricultural Decision Support System</h2>
+                <p class="text-muted">M.Tech Research Project - Explainable AI for Crop Yield Prediction</p>
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h5>Multi-Model AI</h5>
+                        <small>Random Forest, XGBoost, LSTM</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <h5>Explainable AI</h5>
+                        <small>SHAP Analysis & Feature Importance</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h5>Time-Series</h5>
+                        <small>LSTM & Prophet Forecasting</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="feature-icon">
+                            <i class="fas fa-map"></i>
+                        </div>
+                        <h5>Geospatial</h5>
+                        <small>State-wise Analysis & Heatmaps</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="fas fa-seedling"></i>
+                <div class="stat-value">{{ total_crops }}</div>
+                <div class="stat-label">Total Crops</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <i class="fas fa-chart-line"></i>
+                <div class="stat-value">{{ avg_yield }}</div>
+                <div class="stat-label">Avg Yield (tons/ha)</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <i class="fas fa-trophy"></i>
+                <div class="stat-value">{{ top_state }}</div>
+                <div class="stat-label">Top State</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <i class="fas fa-database"></i>
+                <div class="stat-value">{{ total_records }}</div>
+                <div class="stat-label">Data Records</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="dashboard-card">
+                <h5><i class="fas fa-chart-line"></i> Yield Trend Analysis</h5>
+                <div id="trendGraph"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <h5><i class="fas fa-bolt"></i> Quick Prediction</h5>
+                <form action="/predict" method="POST">
+                    <div class="form-group">
+                        <select name="crop" class="form-control" required>
+                            <option value="">Select Crop</option>
+                            {% for crop in crops %}
+                            <option value="{{ crop }}">{{ crop }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="state" class="form-control" required>
+                            <option value="">Select State</option>
+                            {% for state in states %}
+                            <option value="{{ state }}">{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="season" class="form-control" required>
+                            <option value="">Select Season</option>
+                            {% for season in seasons %}
+                            <option value="{{ season }}">{{ season }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-magic"></i> Quick Predict
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Research Highlights -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h5><i class="fas fa-flask"></i> Research Contributions</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item bg-transparent">
+                                <i class="fas fa-check-circle text-success"></i>
+                                Multi-model comparison (RF, XGB, LSTM)
+                            </li>
+                            <li class="list-group-item bg-transparent">
+                                <i class="fas fa-check-circle text-success"></i>
+                                SHAP-based explainable AI integration
+                            </li>
+                            <li class="list-group-item bg-transparent">
+                                <i class="fas fa-check-circle text-success"></i>
+                                Time-series forecasting with LSTM & Prophet
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item bg-transparent">
+                                <i class="fas fa-check-circle text-success"></i>
+                                Geospatial visualization with interactive maps
+                            </li>
+                            <li class="list-group-item bg-transparent">
+                                <i class="fas fa-check-circle text-success"></i>
+                                Model performance comparison dashboard
+                            </li>
+                            <li class="list-group-item bg-transparent">
+                                <i class="fas fa-check-circle text-success"></i>
+                                Automated report generation
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="container">
+        <p class="mb-0">M.Tech Artificial Intelligence Project | Explainable AI for Agricultural Decision Support</p>
+        <small>© 2024 - All Rights Reserved</small>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    // Plot the trend graph
+    var trendGraph = {{ trend_graph | safe }};
+    Plotly.newPlot('trendGraph', trendGraph.data, trendGraph.layout);
+</script>
+
+</body>
+</html>

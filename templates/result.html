@@ -2,27 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prediction Result</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
     <style>
-        body { background-color: #f4f4f4; }
-        .container { margin-top: 50px; }
-        .card { margin-top: 20px; }
+        body {
+            background: #f4f7f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .result-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-top: 60px;
+        }
+
+        .prediction-value {
+            font-size: 30px;
+            font-weight: bold;
+            color: #1b5e20;
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background-color: #1b5e20;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 25px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0d3c14;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 15px;
+            background: #1b5e20;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1 class="text-center">Prediction Result</h1>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Crop: {{ crop }}</h5>
-                <p class="card-text">State: {{ state }}</p>
-                <p class="card-text">Season: {{ season }}</p>
-                <h3 class="card-text">Predicted Yield: {{ prediction }} Metric Tons per Hectare</h3>
-            </div>
+
+<div class="container">
+    <div class="result-card text-center">
+
+        <h3>AI Prediction Result</h3>
+
+        <p><strong>Crop:</strong> {{ crop }}</p>
+        <p><strong>State:</strong> {{ state }}</p>
+        <p><strong>Season:</strong> {{ season }}</p>
+
+        <div class="prediction-value">
+            {{ prediction }} Metric Tons per Hectare
         </div>
-        <a href="/" class="btn btn-primary">Make Another Prediction</a>
+
+        <div class="mt-4">
+            <a href="/" class="btn btn-primary">
+                Run Another Prediction
+            </a>
+        </div>
+
     </div>
+</div>
+
+<div class="footer">
+    Intelligent AI-Based Agricultural Decision Support System
+</div>
+
 </body>
 </html>

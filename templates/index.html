@@ -2,71 +2,189 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Agricultural Decision Support System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crop Yield Prediction</title>
+
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
     <style>
-        body { background-color: #f4f4f4; }
-        .container { margin-top: 50px; }
-        .card { margin-top: 20px; }
+        body {
+            background: #f4f7f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .navbar {
+            background: #1b5e20;
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-top: 30px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #1b5e20;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            background-color: #1b5e20;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 25px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0d3c14;
+        }
+
+        .stats-box {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .stats-box h5 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 15px;
+            background: #1b5e20;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1 class="text-center">Crop Yield Prediction</h1>
+
+<nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="#">🌾 Agricultural Decision Support System</a>
+</nav>
+
+<div class="container">
+
+    <!-- Dashboard Stats -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="stats-box">
+                <h5>Multi-Model AI</h5>
+                <small>Random Forest | XGBoost | LSTM</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-box">
+                <h5>Explainable AI</h5>
+                <small>Feature Importance & Analysis</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-box">
+                <h5>Forecasting Enabled</h5>
+                <small>Time-Series Yield Prediction</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prediction Form -->
+    <div class="dashboard-card">
+        <h4 class="section-title">Crop Yield Prediction Module</h4>
 
         {% if error %}
-            <div class="alert alert-danger text-center" role="alert">
-                {{ error }}
-            </div>
+        <div class="alert alert-danger text-center">
+            {{ error }}
+        </div>
         {% endif %}
-        
+
         <form action="/predict" method="POST">
-            <div class="form-group">
-                <label for="crop">Crop Name</label>
-                <select name="crop" class="form-control" required>
-                    <option value="">Select Crop</option>
-                    {% for crop in crops %}
-                    <option value="{{ crop }}">{{ crop }}</option>
-                    {% endfor %}
-                </select>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Crop</label>
+                    <select name="crop" class="form-control" required>
+                        <option value="">Select Crop</option>
+                        {% for crop in crops %}
+                        <option value="{{ crop }}">{{ crop }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label>State</label>
+                    <select name="state" class="form-control" required>
+                        <option value="">Select State</option>
+                        {% for state in states %}
+                        <option value="{{ state }}">{{ state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Season</label>
+                    <select name="season" class="form-control" required>
+                        <option value="">Select Season</option>
+                        {% for season in seasons %}
+                        <option value="{{ season }}">{{ season }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="state">State Name</label>
-                <select name="state" class="form-control" required>
-                    <option value="">Select State</option>
-                    {% for state in states %}
-                    <option value="{{ state }}">{{ state }}</option>
-                    {% endfor %}
-                </select>
+
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <label>Year</label>
+                    <input type="number" name="year" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label>Rainfall (mm)</label>
+                    <input type="number" name="rainfall" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label>Fertilizer (kg/ha)</label>
+                    <input type="number" name="fertilizer" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label>Pesticide (kg/ha)</label>
+                    <input type="number" name="pesticide" class="form-control">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="season">Season</label>
-                <select name="season" class="form-control" required>
-                    <option value="">Select Season</option>
-                    {% for season in seasons %}
-                    <option value="{{ season }}">{{ season }}</option>
-                    {% endfor %}
-                </select>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary">
+                    Generate AI Prediction
+                </button>
             </div>
-            <div class="form-group">
-                <label for="year">Crop Year (Optional)</label>
-                <input type="number" name="year" class="form-control" min="2000" max="2025" placeholder="Enter Year">
-            </div>
-            <div class="form-group">
-                <label for="rainfall">Annual Rainfall (Optional)</label>
-                <input type="number" name="rainfall" class="form-control" min="0" placeholder="Enter Annual Rainfall">
-            </div>
-            <div class="form-group">
-                <label for="fertilizer">Fertilizer Use (Optional)</label>
-                <input type="number" name="fertilizer" class="form-control" min="0" placeholder="Enter Fertilizer Use">
-            </div>
-            <div class="form-group">
-                <label for="pesticide">Pesticide Use (Optional)</label>
-                <input type="number" name="pesticide" class="form-control" min="0" placeholder="Enter Pesticide Use">
-            </div>
-            <button type="submit" class="btn btn-primary">Predict Yield</button>
+
         </form>
     </div>
+
+</div>
+
+<div class="footer">
+    M.Tech Artificial Intelligence Project | Indian Agriculture Yield Forecasting System
+</div>
+
 </body>
 </html>
